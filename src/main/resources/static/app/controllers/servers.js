@@ -1,6 +1,10 @@
 app.controller('ServerController', function ($scope, Server, $mdToast, $mdDialog) {
     $scope.servers = Server.query();
 
+    $scope.serverDoesNotExist = function (name) {
+        return !$scope.servers.map(function(e) { return e.name}).includes(name);
+    };
+
     $scope.stopServer = function (server) {
         $mdToast.show($mdToast.simple().textContent('Stopping Server'));
         server.$stop().then(function successCallback(response) {
@@ -33,6 +37,28 @@ app.controller('ServerController', function ($scope, Server, $mdToast, $mdDialog
         });
     };
 
+    $scope.rebuildServer = function (ev, server) {
+        var confirm = $mdDialog.confirm()
+            .title('Are you sure you want to rebuild this server?')
+            .textContent('This world will be reset to the starting state!')
+            .targetEvent(ev)
+            .ok('Yes, Please Rebuild!')
+            .cancel('Cancel');
+
+        $mdDialog.show(confirm).then(function () {
+            $mdToast.show($mdToast.simple().textContent('Rebuilding Server'));
+            server.$rebuild().then(function successCallback(response) {
+                $mdToast.show($mdToast.simple().textContent('Server Rebuilt'));
+                $scope.servers = Server.query();
+            }, function errorCallback(response) {
+                $mdToast.show($mdToast.simple().textContent('Problem Rebuilding Server'));
+                $scope.servers = Server.query();
+            });
+        }, function () {
+            // cancel
+        });
+    };
+
     $scope.deleteServer = function (ev, server) {
         var confirm = $mdDialog.confirm()
             .title('Are you sure you want to delete this server?')
@@ -54,4 +80,31 @@ app.controller('ServerController', function ($scope, Server, $mdToast, $mdDialog
             // cancel
         });
     };
+
+    $scope.showCreateServer = function (ev) {
+        $mdDialog.show({
+            controller: DialogController,
+            templateUrl: 'static/app/views/dialog.html',
+            parent: angular.element(document.body),
+            targetEvent: ev,
+            clickOutsideToClose: false,
+            fullscreen: false
+        }).then(function (answer) {
+            $mdToast.show($mdToast.simple().textContent('Server Definition Created'));
+        });
+    };
+
+    function DialogController($scope, $mdDialog) {
+        $scope.serverDefinition = new Server();
+
+        $scope.save = function () {
+            $scope.serverDefinition.$save();
+            $scope.servers = Servers.query();
+            $mdDialog.hide();
+        };
+
+        $scope.cancel = function () {
+            $mdDialog.cancel();
+        };
+    }
 });

@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/server")
@@ -25,34 +27,41 @@ public class ServerController {
         this.repository = repository;
     }
 
-    @PostMapping("{serverDefinitionName}")
-    public void create(@PathVariable String serverDefinitionName) {
-        repository.findByKey(serverDefinitionName).ifPresent(serverManager::createServer);
+    @PostMapping
+    public void create(@RequestBody ServerDefinition serverDefinition) {
+        serverManager.createServer(serverDefinition);
     }
 
-    @DeleteMapping("{containerId}")
-    public void deleteServer(@PathVariable String containerId) {
-        serverManager.removeServer(containerId);
+    @DeleteMapping("{serverName}")
+    public void deleteServer(@PathVariable String serverName) {
+        serverManager.removeServer(serverName);
     }
 
     @PutMapping("stop")
     public void stopServer(@RequestBody Server server) {
-        serverManager.stopServer(server.getContainerId());
+        serverManager.stopServer(server.getName());
     }
 
     @PutMapping("start")
     public void startServer(@RequestBody Server server) {
-        serverManager.startServer(server.getContainerId());
+        serverManager.startServer(server.getName());
     }
 
     @PutMapping("reconfigure")
     public void reconfigureServer(@RequestBody Server server) {
-        repository.findByKey(server.getName())
-                .ifPresent(sd -> serverManager.reConfigureServer(server.getContainerId(), sd));
+        serverManager.reConfigureServer(server.getName());
+    }
+
+    @PutMapping("rebuild")
+    public void rebuildServer(@RequestBody Server server) {
+        serverManager.rebuildServer(server.getName());
     }
 
     @GetMapping
     public List<Server> allServers() {
-        return serverManager.allServers();
+        return serverManager.allServers()
+                .stream()
+                .sorted(Comparator.comparing(Server::getName))
+                .collect(Collectors.toList());
     }
 }

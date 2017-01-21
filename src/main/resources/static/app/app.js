@@ -12,25 +12,21 @@ app.config(function ($routeProvider) {
         templateUrl: 'app/views/servers.html',
         controller: 'ServerController'
     });
-    $routeProvider.when('/create', {
-        templateUrl: 'app/views/main.html',
-        controller: 'CreateController'
-    });
-    $routeProvider.when('/definitions', {
-        templateUrl: 'app/views/definitions.html',
-        controller: 'DefinitionController'
-    });
     $routeProvider.otherwise({
         redirectTo: '/404'
     });
 });
 
 app.factory('Server', function ($resource) {
-    return $resource('/api/server/:containerId',
+    return $resource('/api/server/:name',
         {
-            containerId: '@containerId'
+            name: '@name'
         },
         {
+            'save': {
+                method: 'POST',
+                url: '/api/server'
+            },
             'stop': {
                 method: 'PUT',
                 url: '/api/server/stop'
@@ -42,20 +38,10 @@ app.factory('Server', function ($resource) {
             'reconfigure': {
                 method: 'PUT',
                 url: '/api/server/reconfigure'
-            }
-        }
-    );
-});
-
-app.factory('ServerDefinition', function ($resource) {
-    return $resource('/api/definition/:name',
-        {
-            name: '@name'
-        },
-        {
-            'save': {
-                method: 'POST',
-                url: '/api/definition'
+            },
+            'rebuild': {
+                method: 'PUT',
+                url: '/api/server/rebuild'
             }
         }
     );

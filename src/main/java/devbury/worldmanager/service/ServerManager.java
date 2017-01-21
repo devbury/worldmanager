@@ -2,7 +2,11 @@ package devbury.worldmanager.service;
 
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.exceptions.DockerException;
-import com.spotify.docker.client.messages.*;
+import com.spotify.docker.client.messages.ContainerConfig;
+import com.spotify.docker.client.messages.HostConfig;
+import com.spotify.docker.client.messages.PortBinding;
+import com.spotify.docker.client.messages.Volume;
+import devbury.keeval.KeeValRepository;
 import devbury.worldmanager.WorldManagerSettings;
 import devbury.worldmanager.domain.ServerDefinition;
 import devbury.worldmanager.exception.DockerRuntimeException;
@@ -26,11 +30,14 @@ public class ServerManager {
 
     private final DockerClient dockerClient;
     private final WorldManagerSettings settings;
+    private final KeeValRepository<ServerDefinition> repository;
 
     @Autowired
-    public ServerManager(DockerClient dockerClient, WorldManagerSettings settings) {
+    public ServerManager(DockerClient dockerClient, WorldManagerSettings settings,
+                         KeeValRepository<ServerDefinition> repository) {
         this.dockerClient = dockerClient;
         this.settings = settings;
+        this.repository = repository;
     }
 
     public List<Server> allServers() {
@@ -40,7 +47,7 @@ public class ServerManager {
                 .collect(Collectors.toList());
     }
 
-    public List<Server> inactiveServers() {
+    private List<Server> inactiveServers() {
         try {
             return Stream.concat(
                     dockerClient.listContainers(LABEL, DockerClient.ListContainersParam.withStatusCreated()).stream(),
@@ -52,7 +59,7 @@ public class ServerManager {
         }
     }
 
-    public List<Server> activeServers() {
+    private List<Server> activeServers() {
         try {
             return dockerClient.listContainers(LABEL)
                     .stream()
@@ -100,7 +107,12 @@ public class ServerManager {
         return env;
     }
 
-    public String createServer(ServerDefinition serverDefinition) {
+    public void createServer(ServerDefinition serverDefinition) {
+        repository.create(serverDefinition.getName(), serverDefinition);
+        createContainer(serverDefinition);
+    }
+
+    private void createContainer(ServerDefinition serverDefinition) {
         try {
             Map<String, List<PortBinding>> portBindings = new HashMap<>();
             portBindings.put(MINECRAFT_SERVER_PORT,
@@ -122,41 +134,38 @@ public class ServerManager {
                     .exposedPorts(MINECRAFT_SERVER_PORT)
                     .hostConfig(hostConfig).build();
 
-            ContainerCreation container = dockerClient.createContainer(containerConfig, serverDefinition.getName());
-            return container.id();
+            dockerClient.createContainer(containerConfig, serverDefinition.getName());
+            Thread.sleep(1000);
         } catch (DockerException | InterruptedException e) {
             throw new DockerRuntimeException(e);
         }
     }
 
-    public void startServer(String containerId) {
+    public void startServer(String serverName) {
         try {
-            dockerClient.startContainer(containerId);
+            dockerClient.startContainer(serverName);
         } catch (DockerException | InterruptedException e) {
             throw new DockerRuntimeException(e);
         }
     }
 
-    public void startAllServers() {
-        inactiveServers().stream().map(Server::getContainerId).forEach(this::startServer);
-    }
-
-    public void stopAllServers() {
-        activeServers().stream().map(Server::getContainerId).forEach(this::stopServer);
-    }
-
-    public void stopServer(String containerId) {
+    public void stopServer(String serverName) {
         try {
-            dockerClient.stopContainer(containerId, 0);
+            dockerClient.stopContainer(serverName, 0);
         } catch (DockerException | InterruptedException e) {
             throw new DockerRuntimeException(e);
         }
     }
 
-    public void removeServer(String containerId) {
+    public void removeServer(String serverName) {
+        removeContainer(serverName);
+        repository.delete(serverName);
+    }
+
+    private void removeContainer(String serverName) {
         try {
-            Volume worldVolume = toWorldVolume(dockerClient.inspectContainer(containerId).name());
-            dockerClient.removeContainer(containerId, DockerClient.RemoveContainerParam.forceKill(),
+            Volume worldVolume = toWorldVolume(serverName);
+            dockerClient.removeContainer(serverName, DockerClient.RemoveContainerParam.forceKill(),
                     DockerClient.RemoveContainerParam.removeVolumes());
             dockerClient.removeVolume(worldVolume);
         } catch (DockerException | InterruptedException e) {
@@ -164,22 +173,20 @@ public class ServerManager {
         }
     }
 
-    public String rebuildServer(String containerId, ServerDefinition serverDefinition) {
-        removeServer(containerId);
-        return createServer(serverDefinition);
+    public void rebuildServer(String serverName) {
+        removeContainer(serverName);
+        repository.findByKey(serverName).ifPresent(this::createContainer);
     }
 
-    public Optional<String> findContainerIdByName(String name) {
-        return allServers().stream().filter(s -> s.getName().equals(name)).map(Server::getContainerId).findFirst();
-    }
-
-    public String reConfigureServer(String existingContainerId, ServerDefinition serverDefinition) {
+    public void reConfigureServer(String serverName) {
         try {
-            dockerClient.removeContainer(existingContainerId, DockerClient.RemoveContainerParam.forceKill());
-            Thread.sleep(1000L);
-            return createServer(serverDefinition);
+            dockerClient.removeContainer(serverName,
+                    DockerClient.RemoveContainerParam.forceKill(),
+                    DockerClient.RemoveContainerParam.removeVolumes());
         } catch (DockerException | InterruptedException e) {
             throw new DockerRuntimeException(e);
         }
+        repository.findByKey(serverName).ifPresent(this::createContainer);
+
     }
 }
