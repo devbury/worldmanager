@@ -1,0 +1,38 @@
+<md-dialog aria-label="Server Definition">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>Server Definition</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon>close</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <form name="serverDefinitionForm" ng-cloak>
+            <div class="md-dialog-content">
+                <div layout="row">
+                    <md-input-container>
+                        <label>Name</label>
+                        <input ng-model="serverDefinition.name">
+                    </md-input-container>
+                    <md-input-container>
+                        <label>Port</label>
+                        <input ng-model="serverDefinition.publicPort">
+                    </md-input-container>
+                    <md-input-container>
+                        <label>Seed</label>
+                        <input ng-model="serverDefinition.seed">
+                    </md-input-container>
+                </div>
+            </div>
+        </form>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+        <span flex></span>
+        <md-button ng-click="save()">
+            Save
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>

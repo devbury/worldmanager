@@ -1,0 +1,44 @@
+<div>
+    <h1>Active Servers</h1>
+    <md-content layout="row">
+        <div ng-repeat="server in servers">
+            <div flex-xs ng-if="server.active">
+                <md-card md-whiteframe="1" md-theme="default">
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{server.name}}</span>
+                            <span class="md-subhead">Port : {{server.publicPort}}</span>
+                            <span class="md-subhead">Status : {{server.status}}</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button ng-click="stopServer(server)">Stop</md-button>
+                    </md-card-actions>
+                </md-card>
+            </div>
+        </div>
+    </md-content>
+</div>
+
+<div>
+    <h1>Inactive Servers</h1>
+    <md-content layout="row">
+        <div ng-repeat="server in servers">
+            <div flex-xs ng-if="!server.active">
+                <md-card md-whiteframe="1" md-theme="default">
+                    <md-card-title>
+                        <md-card-title-text>
+                            <span class="md-headline">{{server.name}}</span>
+                            <span class="md-subhead">Status : {{server.status}}</span>
+                        </md-card-title-text>
+                    </md-card-title>
+                    <md-card-actions layout="row" layout-align="end center">
+                        <md-button ng-click="startServer(server)">Start</md-button>
+                        <md-button ng-click="reconfigureServer(server)">Reconfigure</md-button>
+                        <md-button ng-click="deleteServer($event, server)">Delete</md-button>
+                    </md-card-actions>
+                </md-card>
+            </div>
+        </div>
+    </md-content>
+</div>
