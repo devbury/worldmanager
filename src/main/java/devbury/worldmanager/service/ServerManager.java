@@ -70,39 +70,41 @@ public class ServerManager {
         }
     }
 
+    private void addToEnv(List<String> env, Object value, String key) {
+        ofNullable(value).map(v -> key + "=").ifPresent(env::add);
+    }
+
+    private String commaString(List<String> values) {
+        return values.stream().collect(Collectors.joining(","));
+    }
+
     private List<String> buildEnvironment(ServerDefinition serverDefinition) {
         List<String> env = new LinkedList<>();
-        env.add("EULA=TRUE");
-        ofNullable(serverDefinition.getVersion()).map(v -> "VERSION=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getDifficulty()).map(v -> "DIFFICULTY=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getMaxPlayers()).map(v -> "MAX_PLAYERS=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getAllowNether()).map(v -> "ALLOW_NETHER=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getAnnouncePlayerAchievements())
-                .map(v -> "ANNOUNCE_PLAYER_ACHIEVEMENTS=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getEnableCommandBlock()).map(v -> "ENABLE_COMMAND_BLOCK=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getForceGameMode()).map(v -> "FORCE_GAMEMODE=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getGenerateStructures()).map(v -> "GENERATE_STRUCTURES=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getHardcore()).map(v -> "HARDCORE=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getMaxBuildHeight()).map(v -> "MAX_BUILD_HEIGHT=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getGameMode()).map(v -> "MODE=" + v).ifPresent(env::add);
-        ofNullable(serverDefinition.getMaxWorldSize()).map(v -> "MAX_WORLD_SIZE=" + v).ifPresent(env::add);
+        addToEnv(env, "EULA", "TRUE");
+        addToEnv(env, serverDefinition.getVersion(), "VERSION");
+        addToEnv(env, serverDefinition.getDifficulty(), "DIFFICULTY");
+        addToEnv(env, serverDefinition.getMaxPlayers(), "MAX_PLAYERS");
+        addToEnv(env, serverDefinition.getAllowNether(), "ALLOW_NETHER");
+        addToEnv(env, serverDefinition.getAnnouncePlayerAchievements(), "ANNOUNCE_PLAYER_ACHIEVEMENTS");
+        addToEnv(env, serverDefinition.getEnableCommandBlock(), "ENABLE_COMMAND_BLOCK");
+        addToEnv(env, serverDefinition.getForceGameMode(), "FORCE_GAMEMODE");
+        addToEnv(env, serverDefinition.getGenerateStructures(), "GENERATE_STRUCTURES");
+        addToEnv(env, serverDefinition.getHardcore(), "HARDCORE");
+        addToEnv(env, serverDefinition.getMaxBuildHeight(), "MAX_BUILD_HEIGHT");
+        addToEnv(env, serverDefinition.getGameMode(), "MODE");
+        addToEnv(env, serverDefinition.getMaxWorldSize(), "MAX_WORLD_SIZE");
+        addToEnv(env, serverDefinition.getMotd(), "MOTD");
+        addToEnv(env, serverDefinition.getPvp(), "PVP");
 
-        if (serverDefinition.getWorldUrl() != null) {
-            env.add("WORLD=" + serverDefinition.getWorldUrl());
+        if (serverDefinition.getWorld() != null) {
+            addToEnv(env, serverDefinition.getWorld(), "WORLD");
         } else {
-            env.add("SEED=" + serverDefinition.getSeed());
+            addToEnv(env, serverDefinition.getSeed(), "SEED");
         }
 
-        if (!serverDefinition.getWhiteList().isEmpty()) {
-            env.add("WHITELIST=" + serverDefinition.getWhiteList()
-                    .stream()
-                    .collect(Collectors.joining(",")));
-        }
-        if (!serverDefinition.getOps().isEmpty()) {
-            env.add("OPS=" + serverDefinition.getOps()
-                    .stream()
-                    .collect(Collectors.joining(",")));
-        }
+        addToEnv(env, settings.getDefaultWhitelist(), "WHITELIST");
+        addToEnv(env, commaString(serverDefinition.getWhiteList()), "WHITELIST");
+        addToEnv(env, commaString(serverDefinition.getOps()), "OPS");
 
         return env;
     }
@@ -120,7 +122,7 @@ public class ServerManager {
 
             HostConfig hostConfig = HostConfig.builder()
                     .portBindings(portBindings)
-                    .restartPolicy(HostConfig.RestartPolicy.always())
+                    .restartPolicy(HostConfig.RestartPolicy.unlessStopped())
                     .appendBinds(from(toWorldVolume(serverDefinition)).to("/data/world").build())
                     .build();
 

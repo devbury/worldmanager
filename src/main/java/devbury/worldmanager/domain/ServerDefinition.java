@@ -29,11 +29,29 @@ public class ServerDefinition {
     private Boolean forceGameMode = null;
     private Boolean generateStructures = null;
     private Boolean hardcore = null;
+    private Boolean pvp = null;
     private Integer maxBuildHeight = null;
     private GameMode gameMode = null;
     private String seed = String.valueOf(System.currentTimeMillis());
-    private String worldUrl = null;
+    private String world = null;
+    private String motd = null;
     private int serverDefinitionVersion = 0;
+
+    public Boolean getPvp() {
+        return pvp;
+    }
+
+    public void setPvp(Boolean pvp) {
+        this.pvp = pvp;
+    }
+
+    public String getMotd() {
+        return motd;
+    }
+
+    public void setMotd(String motd) {
+        this.motd = motd;
+    }
 
     public String getImage() {
         return image;
@@ -179,12 +197,12 @@ public class ServerDefinition {
         this.seed = seed;
     }
 
-    public String getWorldUrl() {
-        return worldUrl;
+    public String getWorld() {
+        return world;
     }
 
-    public void setWorldUrl(String worldUrl) {
-        this.worldUrl = worldUrl;
+    public void setWorld(String world) {
+        this.world = world;
     }
 
     public int getServerDefinitionVersion() {

@@ -1,0 +1,24 @@
+<div>
+    <h1>Maps</h1>
+    <md-content layout="row">
+        <div ng-repeat="map in maps">
+            <md-card md-whiteframe="1" md-theme="default">
+                <md-card-title>
+                    <md-card-title-text>
+                        <span class="md-headline">{{map.name}}</span>
+                    </md-card-title-text>
+                </md-card-title>
+                <md-card-actions layout="row" layout-align="end center">
+                    <md-button ng-click="deleteMap(map)">Delete</md-button>
+                </md-card-actions>
+            </md-card>
+        </div>
+    </md-content>
+</div>
+<md-content>
+    <div flex layout-align="end end">
+        <md-button class="md-fab" ng-click="showCreateMap($event)">
+            <md-icon>add</md-icon>
+        </md-button>
+    </div>
+</md-content>

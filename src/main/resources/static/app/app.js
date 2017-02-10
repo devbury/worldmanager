@@ -12,9 +12,34 @@ app.config(function ($routeProvider) {
         templateUrl: 'app/views/servers.html',
         controller: 'ServerController'
     });
+    $routeProvider.when('/maps', {
+        templateUrl: 'app/views/maps.html',
+        controller: 'MapController'
+    });
     $routeProvider.otherwise({
         redirectTo: '/404'
     });
+});
+
+app.directive('ngFiles', function ($parse) {
+    function fn_link(scope, element, attrs) {
+        var onChange = $parse(attrs.ngFiles);
+        element.on('change', function (event) {
+            onChange(scope, {$files: event.target.files});
+        });
+    }
+
+    return {
+        link: fn_link
+    }
+});
+
+app.factory('Map', function ($resource) {
+    return $resource('/api/map/:name',
+        {
+            name: '@name'
+        }
+    );
 });
 
 app.factory('Server', function ($resource) {
@@ -45,4 +70,12 @@ app.factory('Server', function ($resource) {
             }
         }
     );
+});
+
+app.run(function ($http, $rootScope) {
+    $http.get('https://launchermeta.mojang.com/mc/game/version_manifest.json').then(function (r) {
+        $rootScope.versions = r.data.versions.map(function (v) {
+            return v.id
+        });
+    });
 });

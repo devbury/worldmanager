@@ -1,8 +1,11 @@
-app.controller('ServerController', function ($scope, Server, $mdToast, $mdDialog) {
+app.controller('ServerController', function ($scope, $rootScope, Server, $mdToast, $mdDialog) {
     $scope.servers = Server.query();
+    $scope.versions = $rootScope.versions;
 
     $scope.serverDoesNotExist = function (name) {
-        return !$scope.servers.map(function(e) { return e.name}).includes(name);
+        return !$scope.servers.map(function (e) {
+            return e.name
+        }).includes(name);
     };
 
     $scope.stopServer = function (server) {
@@ -84,23 +87,26 @@ app.controller('ServerController', function ($scope, Server, $mdToast, $mdDialog
     $scope.showCreateServer = function (ev) {
         $mdDialog.show({
             controller: DialogController,
-            templateUrl: 'static/app/views/dialog.html',
+            scope: $scope,
+            templateUrl: 'static/app/views/definition-dialog.html',
             parent: angular.element(document.body),
             targetEvent: ev,
             clickOutsideToClose: false,
             fullscreen: false
-        }).then(function (answer) {
-            $mdToast.show($mdToast.simple().textContent('Server Definition Created'));
         });
     };
 
-    function DialogController($scope, $mdDialog) {
+    function DialogController($scope, $mdDialog, Server, Map) {
         $scope.serverDefinition = new Server();
+        $scope.maps = Map.query();
 
         $scope.save = function () {
-            $scope.serverDefinition.$save();
-            $scope.servers = Servers.query();
             $mdDialog.hide();
+            $mdToast.show($mdToast.simple().textContent('Creating Server'));
+            $scope.serverDefinition.$save().then(function () {
+                $scope.servers = Server.query();
+                $mdToast.show($mdToast.simple().textContent('Server Created'));
+            });
         };
 
         $scope.cancel = function () {

@@ -1,0 +1,135 @@
+<md-dialog aria-label="Server Definition">
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <h2>Server Definition</h2>
+            <span flex></span>
+            <md-button class="md-icon-button" ng-click="cancel()">
+                <md-icon>close</md-icon>
+            </md-button>
+        </div>
+    </md-toolbar>
+    <md-dialog-content>
+        <form name="serverDefinitionForm" ng-cloak>
+            <div class="md-dialog-content">
+                <div layout="row">
+                    <md-input-container>
+                        <label>Name</label>
+                        <input type="text" ng-model="serverDefinition.name">
+                    </md-input-container>
+
+                    <md-input-container>
+                        <label>Port</label>
+                        <input type="number" min="1025" ng-model="serverDefinition.publicPort">
+                    </md-input-container>
+                </div>
+
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Version</label>
+                    <md-select ng-model="serverDefinition.version">
+                        <md-option value="LATEST">Latest</md-option>
+                        <md-option value="SNAPSHOT">Snapshot</md-option>
+                        <md-option ng-repeat="version in versions" ng-value="version">
+                            {{version}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Message of the Day</label>
+                    <input type="text" ng-model="serverDefinition.motd">
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <label>Seed</label>
+                    <input type="text" ng-model="serverDefinition.seed">
+                </md-input-container>
+
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Difficulty</label>
+                    <md-select ng-model="serverDefinition.difficulty">
+                        <md-option value="EASY">Easy</md-option>
+                        <md-option value="PEACEFUL">Peaceful</md-option>
+                        <md-option value="NORMAL">Normal</md-option>
+                        <md-option value="HARD">Hard</md-option>
+                    </md-select>
+                </md-input-container>
+
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Game Mode</label>
+                    <md-select ng-model="serverDefinition.gameMode">
+                        <md-option value="CREATIVE">Creative</md-option>
+                        <md-option value="SURVIVAL">Survival</md-option>
+                        <md-option value="ADVENTURE">Adventure</md-option>
+                        <md-option value="SPECTATOR">Spectator</md-option>
+                    </md-select>
+                </md-input-container>
+
+                <md-input-container>
+                    <label>Files</label>
+                    <input type="file" name="file" multiple
+                           ng-files="getTheFiles($files)"/>
+                </md-input-container>
+
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>World Map</label>
+                    <md-select ng-model="serverDefinition.world">
+                        <md-option value="">None</md-option>
+                        <md-option ng-repeat="map in maps" ng-value="map.name">
+                            {{map.name}}
+                        </md-option>
+                    </md-select>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.allowNether">
+                        Allow access to Nether
+                    </md-checkbox>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.announcePlayerAchievements">
+                        Announce player achievements
+                    </md-checkbox>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.enableCommandBlock">
+                        Command blocks enabled
+                    </md-checkbox>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.forceGameMode">
+                        Force game mode
+                    </md-checkbox>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.generateStructures">
+                        Generate Structures
+                    </md-checkbox>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.hardcore">
+                        Hardcore
+                    </md-checkbox>
+                </md-input-container>
+
+                <md-input-container class="ms-block" flex-gt-sm>
+                    <md-checkbox ng-model="serverDefinition.pvp">
+                        Pvp enabled
+                    </md-checkbox>
+                </md-input-container>
+
+            </div>
+        </form>
+    </md-dialog-content>
+
+    <md-dialog-actions layout="row">
+        <span flex></span>
+        <md-button ng-click="save()">
+            Save
+        </md-button>
+    </md-dialog-actions>
+</md-dialog>

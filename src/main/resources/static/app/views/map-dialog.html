@@ -1,7 +1,7 @@
-<md-dialog aria-label="Server Definition">
+<md-dialog aria-label="Upload Map">
     <md-toolbar>
         <div class="md-toolbar-tools">
-            <h2>Server Definition</h2>
+            <h2>Upload Map</h2>
             <span flex></span>
             <md-button class="md-icon-button" ng-click="cancel()">
                 <md-icon>close</md-icon>
@@ -9,20 +9,18 @@
         </div>
     </md-toolbar>
     <md-dialog-content>
-        <form name="serverDefinitionForm" ng-cloak>
+        <form name="mapForm" ng-cloak>
             <div class="md-dialog-content">
                 <div layout="row">
                     <md-input-container>
                         <label>Name</label>
-                        <input ng-model="serverDefinition.name">
+                        <input type="text" ng-model="map.name">
                     </md-input-container>
+
                     <md-input-container>
-                        <label>Port</label>
-                        <input ng-model="serverDefinition.publicPort">
-                    </md-input-container>
-                    <md-input-container>
-                        <label>Seed</label>
-                        <input ng-model="serverDefinition.seed">
+                        <label>Files</label>
+                        <input type="file" name="file" multiple
+                               ng-files="getTheFiles($files)"/>
                     </md-input-container>
                 </div>
             </div>
@@ -31,7 +29,7 @@
 
     <md-dialog-actions layout="row">
         <span flex></span>
-        <md-button ng-click="save()">
+        <md-button ng-click="uploadFiles()">
             Save
         </md-button>
     </md-dialog-actions>
